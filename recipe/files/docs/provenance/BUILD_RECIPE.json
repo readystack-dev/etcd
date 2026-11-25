@@ -1,0 +1,98 @@
+{
+  "schema": "kitforge.build_recipe.v1",
+  "slug": "etcd",
+  "image": "readystack/etcd:v3.7.4-CE-ubuntu24.04-r1",
+  "build_method": "source-rebuild-go",
+  "source": {
+    "repo": "https://github.com/etcd-io/etcd",
+    "ref": "v3.7.4",
+    "builder_image": "golang:1.26.11-bookworm",
+    "go_module_root": "go.etcd.io/etcd/v3",
+    "go_version_required": "1.25.0",
+    "multi_module": true,
+    "git_sha": "90b034a",
+    "_version_note": "v3.6.12 LIVE-VERIFIED on <redacted: internal host> (clone --depth 1 --branch v3.6.12). Version symbol Version=\"3.6.12\" is HARDCODED in api/version/version.go; only go.etcd.io/etcd/api/v3/version.GitSHA is injected via -ldflags (=90b034a). MULTI-MODULE: 7 modules (root `.`=go.etcd.io/etcd/v3 + api, pkg, client/pkg, client/v3, server, etcdctl, etcdutl, tests) wired by `replace` directives in the ROOT go.mod (replace go.etcd.io/etcd/server/v3 => ./server, etc.). The product binaries live in SUB-modules, NOT the root \u2014 `go build ./server` from the repo root FAILS. TOOLCHAIN: .go-version=1.25.10, go.mod `go 1.25.0` + `toolchain go1.25.10`; with default GOTOOLCHAIN=auto, Go 1.26 would DOWNLOAD go1.25.10 over the network (breaks --network=none). MUST set GOTOOLCHAIN=local so the container's go1.26.4 (satisfies go>=1.25.0) compiles \u2014 verified. GOWORK=off is a harmless no-op here (no go.work); the relevant handling is 'cd into the module dir'.",
+    "build_env": {
+      "CGO_ENABLED": "0",
+      "GOOS": "linux",
+      "GOARCH": "amd64",
+      "GOTOOLCHAIN": "local",
+      "GOFLAGS": "-buildvcs=false",
+      "GOWORK": "off"
+    },
+    "vendor_build": null,
+    "_no_vendor_build_note": "etcd ships NO web UI / dashboard / embedded frontend (zero go:embed of assets) \u2014 a plain per-module `go build .` produces a complete server. NO Node/npm asset step; source.vendor_build is intentionally OMITTED (null).",
+    "_offline_vendor_note": "HERMETIC/OFFLINE VENDOR GAP (highest risk): dep_bumps + `go mod tidy -e` + `go mod vendor` MUST run PER binary sub-module (from inside ./server, ./etcdctl, ./etcdutl) \u2014 a single root `go mod vendor` (the render_l009_kit default) does NOT vendor the binary sub-modules and the --network=none offline build WILL fail. The kit-builder needs a per-module vendor loop for this product (L-A50).",
+    "source_date_epoch": 1795161389,
+    "source_date_epoch_provenance": "the time release v3.7.4-CE-ubuntu24.04-r1 was cut (2026-11-20T07:56:29Z), by scripts/retarget.py: ReadyStack dates an image by when its release was packaged (owner 2026-11-10), recorded here once and used by every rebuild of the release; it builds upstream commit 2e8a5c99e498, dated 2026-11-18T23:39:15Z (source.commit_epoch).",
+    "commit": "2e8a5c99e4982c8d4c521be15364ea4c5c68a489",
+    "source_date_epoch_basis": "release-cut",
+    "commit_epoch": 1795045155
+  },
+  "binaries_from_source": [
+    {
+      "name": "etcd",
+      "module": "go.etcd.io/etcd/server/v3",
+      "module_dir": "./server",
+      "main_pkg": ".",
+      "cgo_enabled": 0,
+      "build_tags": [],
+      "build_flags": [
+        "-trimpath",
+        "-buildvcs=false"
+      ],
+      "ldflags": "-s -w -X=go.etcd.io/etcd/api/v3/version.GitSHA=@COMMIT:7@",
+      "out_path": "/usr/bin/etcd",
+      "verify_subcmd": "--version",
+      "_note": "PRIMARY single-binary target. Build from INSIDE its module dir: `cd ./server && CGO_ENABLED=0 GOTOOLCHAIN=local GOFLAGS=-buildvcs=false go build -trimpath -buildvcs=false -ldflags=\"-s -w -X=go.etcd.io/etcd/api/v3/version.GitSHA=90b034a\" -o /out/etcd .`. main_pkg `.` (server/main.go wraps go.etcd.io/etcd/etcdmain). Mirrors upstream scripts/build.sh per-module `cd && go build .`; ReadyStack adds mandatory -buildvcs=false (kills phantom 0.0.0 CVEs) + -s -w. -installsuffix=cgo (legacy no-op under CGO=0) is dropped. Verified live: 26.9 MB static stripped ELF, `etcd --version` => 3.6.12 / Git SHA 90b034a / go1.26.4 / linux/amd64."
+    },
+    {
+      "name": "etcdctl",
+      "module": "go.etcd.io/etcd/etcdctl/v3",
+      "module_dir": "./etcdctl",
+      "main_pkg": ".",
+      "cgo_enabled": 0,
+      "build_tags": [],
+      "build_flags": [
+        "-trimpath",
+        "-buildvcs=false"
+      ],
+      "ldflags": "-s -w -X=go.etcd.io/etcd/api/v3/version.GitSHA=@COMMIT:7@",
+      "out_path": "/usr/bin/etcdctl",
+      "verify_subcmd": "version",
+      "_note": "Admin CLI shipped for the handbook (the sqlite3-CLI parity slot). Build from `cd ./etcdctl && go build .`. 17.8 MB static stripped ELF. Do NOT bake ETCDCTL_API=3 in ENV \u2014 removed in 3.6, emits an 'unrecognized environment variable' warning (v3 is the default)."
+    },
+    {
+      "name": "etcdutl",
+      "module": "go.etcd.io/etcd/etcdutl/v3",
+      "module_dir": "./etcdutl",
+      "main_pkg": ".",
+      "cgo_enabled": 0,
+      "build_tags": [],
+      "build_flags": [
+        "-trimpath",
+        "-buildvcs=false"
+      ],
+      "ldflags": "-s -w -X=go.etcd.io/etcd/api/v3/version.GitSHA=@COMMIT:7@",
+      "out_path": "/usr/bin/etcdutl",
+      "verify_subcmd": "version",
+      "_note": "Data/maintenance util (snapshot restore/defrag), optional and cheap to include. Build from `cd ./etcdutl && go build .`. 17.7 MB static stripped ELF."
+    }
+  ],
+  "runtime_packages": [
+    "base-files",
+    "base-passwd",
+    "ca-certificates",
+    "coreutils",
+    "dash",
+    "libc6",
+    "libssl3t64",
+    "openssl",
+    "tzdata"
+  ],
+  "runtime_base": {
+    "kind": "chisel",
+    "shell": true,
+    "packages": "vendored/chisel/packages.tsv"
+  }
+}

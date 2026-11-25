@@ -1,0 +1,9 @@
+{
+  "schema": "kitforge.source_tree_hash.v1",
+  "slug": "etcd",
+  "repo": "https://github.com/etcd-io/etcd",
+  "ref": "v3.7.4",
+  "commit": "2e8a5c99e4982c8d4c521be15364ea4c5c68a489",
+  "tree_listing_sha256": "08927e30dd0dc2f13d504275b8d9518282e06ab819d10ee5d05709eaec71b240",
+  "file_count": 1495
+}

@@ -1,0 +1,7 @@
+image_manifest_digest=sha256:0a3fd6184f812c32e3754a5f897438311f23e0aa8eee61ccfe45e51f894e5149
+config_digest=sha256:1d24c1db2f35677ab1192af727d4a93d551cb2163e999f9026c8fb63dfdb5ce6
+tag=readystack/etcd:v3.7.4-CE-ubuntu24.04-r1
+probe_port=2379
+probe_path=/health
+probe_timeout=180
+verify_secret=ETCD_ROOT_PASSWORD
